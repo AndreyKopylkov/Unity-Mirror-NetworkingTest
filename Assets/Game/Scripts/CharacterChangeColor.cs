@@ -55,9 +55,13 @@ public class CharacterChangeColor : MonoBehaviour
         _renderer.SetPropertyBlock(_materialPropertyBlock);
     }
 
-    public void ChangeColorOnTime(Color targetColor, float duration)
+    public void ChangeColorOnTime(Color targetColor, float duration, GameObject playerInstigator)
     {
-        if(ChangeColorOnNew(targetColor)) StartCoroutine(ResetColorAfterDelayCoroutine(duration));
+        if (ChangeColorOnNew(targetColor))
+        {
+            StartCoroutine(ResetColorAfterDelayCoroutine(duration));
+            GlobalEventManager.SendPlayerChangeColor(playerInstigator);
+        }
     }
 
     private IEnumerator ResetColorAfterDelayCoroutine(float duration)

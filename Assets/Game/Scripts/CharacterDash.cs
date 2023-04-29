@@ -2,118 +2,104 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Mirror;
-using MoreMountains.TopDownEngine;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class CharacterDash : NetworkBehaviour
 {
-    public enum DashTypes { Curve, Physics }
-
-    public UnityEvent OnDashStart;
-    public UnityEvent OnDashStop;
+    public event Action OnDashStart;
+    public event Action OnDashStop;
     
     [SerializeField] private float _dashForceForPhysicsType = 10f;
     [SerializeField] private bool _resetVelocityOnEndPhysicDash = true;
-    [SerializeField] private DashTypes _dashType = DashTypes.Curve;
     [SerializeField] private Rigidbody _rigidbody;
-    [Header("Dash")]
-    [SerializeField] private Vector3 _dashDirection = Vector3.forward;
-    [SerializeField] private float _dashDistance = 10f;
+    [SerializeField] private CharacterController _characterController;
+    [SerializeField] private PlayerMovement _playerMovement;
     [SerializeField] private float _dashDuration = 0.5f;
-    [SerializeField] private AnimationCurve _dashCurve = new AnimationCurve(new Keyframe(0f, 0f),
-        new Keyframe(1f, 1f));
+    [SerializeField] private float _cooldownTime = 1f;
+    [SerializeField] private PlayerInput _playerInput;
+    [SerializeField] private Camera _camera;
+    [SerializeField] private float _additionalYAngel = 0;
 
-    protected bool _dashing;
-    protected float _dashTimer;
-    protected Vector3 _dashOrigin;
-    protected Vector3 _dashDestination;
-    protected Vector3 _newPosition;
-    
+    private Coroutine _dashingCoroutine;
 
     private void Awake()
     {
         Initialization();
     }
 
-    private void Update()
+    private void OnEnable()
     {
-        HandleInput();
-        
-        ProcessAbility();
+        _playerInput.OnDashPush += TryDash;
     }
 
-    protected void Initialization()
+    private void OnDisable()
+    {
+        _playerInput.OnDashPush -= TryDash;
+    }
+    
+    private void Initialization()
     {
         
     }
     
-    protected void HandleInput()
+    private void TryDash()
     {
         if (isLocalPlayer)
         {
-            if (Input.GetKeyDown(KeyCode.Space) && !_dashing)
+            if (_playerInput && _dashingCoroutine == null)
             {
                 DashStart();
             }
         }
     }
     
-    public virtual void DashStart()
+    private void DashStart()
     {
         Debug.Log("Dash start");
-        OnDashStart.Invoke();
-        float angle  = 0f;
-        _dashing = true;
-        _dashTimer = 0f;
-        _dashOrigin = this.transform.position;
+        
+        OnDashStart?.Invoke();
+        _playerMovement.CanMove = false;
 
-        switch (_dashType)
-        {
-            case DashTypes.Physics:
-            {
-                Vector3 dashDirection = transform.forward;
-                _rigidbody.AddForce(_dashForceForPhysicsType * dashDirection, ForceMode.VelocityChange);
-                break;
-            }
-            case DashTypes.Curve:
-            {
-                // angle = Vector3.SignedAngle(this.transform.forward, _controller.CurrentDirection.normalized, Vector3.up);
-                //Добавить проверку попадания в стену
-                _dashDestination = this.transform.position + _dashDirection.normalized * _dashDistance;
-                // _dashDestination = MMMaths.RotatePointAroundPivot(_dashDestination, this.transform.position, _dashAngle);
-                break;
-            }
-        }
+        Vector3 cameraForward = _camera.transform.forward;
+        cameraForward.y = 0;
+        cameraForward = cameraForward.normalized;
+        Quaternion rotation = Quaternion.LookRotation(cameraForward);
+
+        Vector3 dashDirection;
+        if (_playerInput.PrimaryMovementDirection == Vector3.zero)
+            dashDirection = cameraForward;
+        else
+            dashDirection = (rotation * _playerInput.PrimaryMovementDirection).normalized;
+        dashDirection.y += _additionalYAngel;
+        _rigidbody.AddForce(_dashForceForPhysicsType * dashDirection, ForceMode.VelocityChange);
+        // _characterController.Move(_dashForceForPhysicsType * dashDirection);
+        _dashingCoroutine = StartCoroutine(DashingCoroutine());
     }
 
-    public void ProcessAbility()
-    {
-        if (_dashing)
+    private IEnumerator DashingCoroutine()
+    { 
+        float dashTimer = 0;
+
+        while (dashTimer < _dashDuration)
         {
-            if (_dashTimer < _dashDuration)
-            {
-                if (_dashType == DashTypes.Curve)
-                {
-                    _newPosition = Vector3.Lerp(_dashOrigin, _dashDestination, _dashCurve.Evaluate(_dashTimer / _dashDuration));
-                    transform.position = _newPosition; 
-                }
-                
-                _dashTimer += Time.deltaTime;
-            }
-            else
-            {
-                DashStop();                   
-            }
+            dashTimer += Time.deltaTime;
+            yield return null;
         }
+        
+        DashStop();
+
+        yield return new WaitForSeconds(_cooldownTime);
+        _dashingCoroutine = null;
     }
     
-    protected virtual void DashStop()
+    private void DashStop()
     {
         Debug.Log("Dash stop");
-        OnDashStop.Invoke();
-        _dashing = false;
+        OnDashStop?.Invoke();
+        _characterController.transform.position = transform.position;
+        _playerMovement.CanMove = true;
         if(_resetVelocityOnEndPhysicDash)
             _rigidbody.velocity = Vector3.zero;
     }

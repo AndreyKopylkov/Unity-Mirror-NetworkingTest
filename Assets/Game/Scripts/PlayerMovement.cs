@@ -4,14 +4,25 @@ using System.Collections.Generic;
 using Mirror;
 using UnityEngine;
 
-public class PlayerController : NetworkBehaviour
+public class PlayerMovement : NetworkBehaviour
 {
     [SerializeField] private float _moveSpeed = 0.5f;
     [SerializeField] private Rigidbody _rigidbody;
+    [SerializeField] private CharacterController _characterController;
+    [SerializeField] private Camera _camera;
+    [SerializeField] private PlayerInput _playerInput;
 
     private float _moveHorizontal;
     private float _moveVertical;
-    private Vector3 _movementVector3;
+    private Vector3 _movementDirection;
+    private bool _canMove;
+
+    public bool CanMove { get => _canMove; set => _canMove = value; }
+
+    private void Awake()
+    {
+        Initialize();
+    }
 
     // Update is called once per frame
     void Update()
@@ -26,20 +37,28 @@ public class PlayerController : NetworkBehaviour
         Move();
     }
 
+    private void Initialize()
+    {
+        _canMove = true;
+    }
+
     private void HandleMovement()
     {
-        if (isLocalPlayer)
-        {
-            _moveHorizontal = Input.GetAxis("Horizontal");
-            _moveVertical = Input.GetAxis("Vertical");
-            _movementVector3 = new Vector3(_moveHorizontal, 0, _moveVertical);
-        }
+        Vector3 cameraForward = _camera.transform.forward;
+        cameraForward.y = 0;
+        cameraForward = cameraForward.normalized;
+        Quaternion rotation = Quaternion.LookRotation(cameraForward);
+            
+        _movementDirection = (rotation * _playerInput.PrimaryMovementDirection).normalized;
     }
 
     private void Move()
     {
+        if(!_canMove) return;
+        
         // transform.position = transform.position + _movementVector3 * _moveSpeed;
-        _rigidbody.MovePosition(transform.position + _movementVector3 * _moveSpeed);
+        // _rigidbody.MovePosition(transform.position + _movementVector3 * _moveSpeed);
+        _characterController.Move(_movementDirection * _moveSpeed);
     }
 
     private void DashInput()
@@ -58,7 +77,6 @@ public class PlayerController : NetworkBehaviour
     private void Dash()
     {
         Debug.Log("Sending this command to Server");
-        Debug.Log("Player " + gameObject.name + " made dash");
     }
 
     //Вызывается на сервере - работает на всех клиентах
