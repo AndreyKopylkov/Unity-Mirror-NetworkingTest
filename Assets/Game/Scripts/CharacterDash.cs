@@ -19,10 +19,10 @@ public class CharacterDash : NetworkBehaviour
     [SerializeField] private float _dashDuration = 0.5f;
     [SerializeField] private float _cooldownTime = 1f;
     [SerializeField] private PlayerInput _playerInput;
-    [SerializeField] private Camera _camera;
     [SerializeField] private float _additionalYAngel = 0;
 
     private Coroutine _dashingCoroutine;
+    private Camera _camera;
 
     private void Awake()
     {
@@ -41,7 +41,7 @@ public class CharacterDash : NetworkBehaviour
     
     private void Initialization()
     {
-        
+        _camera = Camera.main;
     }
     
     private void TryDash()

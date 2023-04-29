@@ -7,7 +7,6 @@ public class ThirdPersonCameraController : NetworkBehaviour
     public enum RotationTypes {Instant, Smooth};
     
     [SerializeField] private Transform _player;
-    [SerializeField] private Transform _camera;
     [SerializeField] private float _distance = 5.0f;
     [SerializeField] private float _height = 2.0f;
     [SerializeField] private float _sensitivity = 3.0f;
@@ -19,21 +18,26 @@ public class ThirdPersonCameraController : NetworkBehaviour
     
     private float _rotationX = 0.0f;
     private float _rotationY = 0.0f;
+    private Camera _camera;
 
     private void Awake()
     {
-        _camera.position = _player.position - transform.rotation * Vector3.forward * _distance + Vector3.up * _height;
-
-        CharacterController characterController;
+        _camera = Camera.main;
+        MoveCamera();
+        _camera.transform.SetParent(transform);
     }
 
     void Update()
     {
+        if(!isLocalPlayer) return;
+        
         RotateCamera();
     }
     
     private void LateUpdate()
     {
+        if(!isLocalPlayer) return;
+
         RotatePlayer();
     }
 
@@ -46,7 +50,7 @@ public class ThirdPersonCameraController : NetworkBehaviour
                     _player.transform.rotation.z);
                 break;
             case RotationTypes.Smooth:
-                Vector3 cameraForward = _camera.forward;
+                Vector3 cameraForward = _camera.transform.forward;
                 cameraForward.y = 0;
                 cameraForward = cameraForward.normalized;
                 Quaternion targetRotation = Quaternion.LookRotation(cameraForward);
@@ -56,12 +60,17 @@ public class ThirdPersonCameraController : NetworkBehaviour
         }
     }
 
+    private void MoveCamera()
+    {
+        _camera.transform.position = _player.position - transform.rotation * Vector3.forward * _distance + Vector3.up * _height;
+    }
+
     private void RotateCamera()
     {
         _rotationX += _playerInput.SecondaryMovementDirection.x * _sensitivity;
         _rotationY -= _playerInput.SecondaryMovementDirection.y * _sensitivity;
         _rotationY = Mathf.Clamp(_rotationY, _limitUp, _limitDown);
     
-        _camera.rotation = Quaternion.Euler(_rotationY, _rotationX, 0);
+        _camera.transform.rotation = Quaternion.Euler(_rotationY, _rotationX, 0);
     }
 }

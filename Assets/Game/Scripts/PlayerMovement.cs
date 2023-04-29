@@ -11,7 +11,6 @@ public class PlayerMovement : NetworkBehaviour
     [SerializeField] private float _moveSpeed = 0.5f;
     [SerializeField] private Rigidbody _rigidbody;
     [SerializeField] private CharacterController _characterController;
-    [SerializeField] private Camera _camera;
     [SerializeField] private PlayerInput _playerInput;
     [SerializeField] private MovementTypes _movementType = MovementTypes.CharacterControllerMove;
 
@@ -19,6 +18,7 @@ public class PlayerMovement : NetworkBehaviour
     private float _moveVertical;
     private Vector3 _movementDirection;
     private bool _canMove;
+    private Camera _camera;
 
     public bool CanMove { get => _canMove; set => _canMove = value; }
 
@@ -37,12 +37,14 @@ public class PlayerMovement : NetworkBehaviour
 
     private void FixedUpdate()
     {
-        Move();
+        if(isLocalPlayer)
+            Move();
     }
 
     private void Initialize()
     {
         _canMove = true;
+        _camera = Camera.main;
     }
 
     private void HandleMovement()

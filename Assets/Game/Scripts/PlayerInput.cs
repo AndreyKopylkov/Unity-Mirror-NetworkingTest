@@ -47,6 +47,7 @@ public class PlayerInput : NetworkBehaviour
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
             OnDashPush?.Invoke();
+            Debug.Log("Sssss");
         }
     }
 }
