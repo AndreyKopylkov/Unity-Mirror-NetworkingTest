@@ -6,11 +6,14 @@ using UnityEngine;
 
 public class PlayerMovement : NetworkBehaviour
 {
+    public enum MovementTypes {RigidbodyMovePosition, CharacterControllerMove}
+    
     [SerializeField] private float _moveSpeed = 0.5f;
     [SerializeField] private Rigidbody _rigidbody;
     [SerializeField] private CharacterController _characterController;
     [SerializeField] private Camera _camera;
     [SerializeField] private PlayerInput _playerInput;
+    [SerializeField] private MovementTypes _movementType = MovementTypes.CharacterControllerMove;
 
     private float _moveHorizontal;
     private float _moveVertical;
@@ -52,13 +55,21 @@ public class PlayerMovement : NetworkBehaviour
         _movementDirection = (rotation * _playerInput.PrimaryMovementDirection).normalized;
     }
 
+    [Command]
     private void Move()
     {
         if(!_canMove) return;
         
         // transform.position = transform.position + _movementVector3 * _moveSpeed;
-        // _rigidbody.MovePosition(transform.position + _movementVector3 * _moveSpeed);
-        _characterController.Move(_movementDirection * _moveSpeed);
+        switch (_movementType)
+        {
+            case MovementTypes.RigidbodyMovePosition:
+                _rigidbody.MovePosition(_rigidbody.position + _movementDirection * _moveSpeed);
+                break;
+            case MovementTypes.CharacterControllerMove:
+                _characterController.Move(_movementDirection * _moveSpeed);
+                break;
+        }
     }
 
     private void DashInput()
