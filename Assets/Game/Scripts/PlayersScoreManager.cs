@@ -6,10 +6,11 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class PlayersScoreManager : MonoBehaviour
+public class PlayersScoreManager : NetworkBehaviour
 {
     [SerializeField] private TextMeshProUGUI _scoreTMP;
-
+    
+    [SyncVar]
     private List<PlayerScoreData> _playersScoreDataList = new List<PlayerScoreData>();
 
     private void Awake()
@@ -48,11 +49,10 @@ public class PlayersScoreManager : MonoBehaviour
             if (playerScoreData.PlayerGO == player)
             {
                 playerScoreData.Score++;
+                SetText();
                 return;
             }
         }
-        
-        SetText();
     }
 
     private void SetText()
