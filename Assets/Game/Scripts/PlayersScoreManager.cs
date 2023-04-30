@@ -10,8 +10,9 @@ public class PlayersScoreManager : NetworkBehaviour
 {
     [SerializeField] private TextMeshProUGUI _scoreTMP;
     
-    [SyncVar]
-    private List<PlayerScoreData> _playersScoreDataList = new List<PlayerScoreData>();
+    private SyncList<PlayerScoreData> _playersScoreDataList = new SyncList<PlayerScoreData>();
+
+    // public delegate void PlayersScoreDataListChanged(List<PlayerScoreData> playersScoreDataList);
 
     private void Awake()
     {
@@ -31,8 +32,12 @@ public class PlayersScoreManager : NetworkBehaviour
         SetText();
     }
 
+    [Server]
     private void AddPlayer(GameObject player)
     {
+        if (!isOwned) return;
+        
+        Debug.Log("AddPlayer");
         PlayerScoreData playerScoreData = new PlayerScoreData();
         playerScoreData.PlayerGO = player;
         playerScoreData.PlayerID = player.name;
@@ -42,8 +47,10 @@ public class PlayersScoreManager : NetworkBehaviour
         SetText();
     }
 
+    [ClientRpc]
     private void AddScore(GameObject player)
     {
+        Debug.Log("AddScore");
         foreach (var playerScoreData in _playersScoreDataList)
         {
             if (playerScoreData.PlayerGO == player)
@@ -55,11 +62,13 @@ public class PlayersScoreManager : NetworkBehaviour
         }
     }
     
+    [ContextMenu("SetText")]
     private void SetText()
     {
         if(!isClient)
             return;
         
+        Debug.Log("Set Text!!!");
         string newText = "Score: ";
         foreach (var playerScoreData in _playersScoreDataList)
         {

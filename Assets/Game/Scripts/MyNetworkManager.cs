@@ -35,6 +35,7 @@ public class MyNetworkManager : NetworkManager
         player.name = $"{playerPrefab.name} [connId={conn.connectionId}]";
         NetworkServer.AddPlayerForConnection(conn, player);
         
+        Debug.Log("Send event - SendPlayerConnect");
         GlobalEventManager.SendPlayerConnect(player);
     }
 

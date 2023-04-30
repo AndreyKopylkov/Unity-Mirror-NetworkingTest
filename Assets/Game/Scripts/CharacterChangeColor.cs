@@ -61,6 +61,7 @@ public class CharacterChangeColor : MonoBehaviour
         {
             StartCoroutine(ResetColorAfterDelayCoroutine(duration));
             GlobalEventManager.SendPlayerChangeColor(playerInstigator);
+            Debug.Log("Send event - SendPlayerChangeColor");
         }
     }
 
