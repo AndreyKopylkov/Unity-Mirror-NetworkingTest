@@ -158,7 +158,7 @@ MonoBehaviour:
   _rigidbody: {fileID: 8958867824643356910}
   _characterController: {fileID: 1281168046770563481}
   _playerInput: {fileID: 3516570310638162443}
-  _movementType: 1
+  _movementType: 0
 --- !u!114 &7674309418776920755
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -226,7 +226,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f74aedd71d9a4f55b3ce499326d45fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncDirection: 0
+  syncDirection: 1
   syncMode: 0
   syncInterval: 0
   target: {fileID: 1877367683715037359}
@@ -258,7 +258,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83392ae5c1b731446909f252fd494ae4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncDirection: 0
+  syncDirection: 1
   syncMode: 0
   syncInterval: 0.1
   target: {fileID: 8958867824643356910}
@@ -322,10 +322,10 @@ Rigidbody:
   m_Mass: 1
   m_Drag: 0.1
   m_AngularDrag: 0.1
-  m_UseGravity: 1
-  m_IsKinematic: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 80
+  m_Constraints: 84
   m_CollisionDetection: 0
 --- !u!114 &3516570310638162443
 MonoBehaviour:
@@ -351,7 +351,7 @@ CapsuleCollider:
   m_GameObject: {fileID: 1877367683715037361}
   m_Material: {fileID: 13400000, guid: bf5ab61e61829e348ac6474dd1f34e80, type: 2}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   m_Radius: 0.5
   m_Height: 2
   m_Direction: 1

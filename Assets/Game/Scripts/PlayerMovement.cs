@@ -57,7 +57,7 @@ public class PlayerMovement : NetworkBehaviour
         _movementDirection = (rotation * _playerInput.PrimaryMovementDirection).normalized;
     }
 
-    [Command]
+    // [Command]
     private void Move()
     {
         if(!_canMove) return;

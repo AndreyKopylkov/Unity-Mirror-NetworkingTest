@@ -23,8 +23,7 @@ public class ThirdPersonCameraController : NetworkBehaviour
     private void Awake()
     {
         _camera = Camera.main;
-        MoveCamera();
-        _camera.transform.SetParent(transform);
+        // _camera.transform.SetParent(transform);
     }
 
     void Update()
@@ -32,6 +31,7 @@ public class ThirdPersonCameraController : NetworkBehaviour
         if(!isLocalPlayer) return;
         
         RotateCamera();
+        MoveCamera();
     }
     
     private void LateUpdate()

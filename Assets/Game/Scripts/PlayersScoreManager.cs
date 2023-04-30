@@ -54,9 +54,12 @@ public class PlayersScoreManager : NetworkBehaviour
             }
         }
     }
-
+    
     private void SetText()
     {
+        if(!isClient)
+            return;
+        
         string newText = "Score: ";
         foreach (var playerScoreData in _playersScoreDataList)
         {
@@ -68,9 +71,9 @@ public class PlayersScoreManager : NetworkBehaviour
 
 public class PlayerScoreData
 {
-    private GameObject _playerGO;
-    private string _playerID;
-    private int _score;
+    [SyncVar] private GameObject _playerGO;
+    [SyncVar] private string _playerID;
+    [SyncVar] private int _score;
 
     public GameObject PlayerGO { get => _playerGO; set => _playerGO = value; }
     public string PlayerID { get => _playerID; set => _playerID = value; }
