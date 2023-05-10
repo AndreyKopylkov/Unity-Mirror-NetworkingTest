@@ -158,7 +158,7 @@ MonoBehaviour:
   _rigidbody: {fileID: 8958867824643356910}
   _characterController: {fileID: 1281168046770563481}
   _playerInput: {fileID: 3516570310638162443}
-  _movementType: 0
+  _movementType: 1
 --- !u!114 &7674309418776920755
 MonoBehaviour:
   m_ObjectHideFlags: 0

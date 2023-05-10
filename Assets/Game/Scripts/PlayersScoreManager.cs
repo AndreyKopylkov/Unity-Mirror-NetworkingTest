@@ -47,7 +47,7 @@ public class PlayersScoreManager : NetworkBehaviour
         SetText();
     }
 
-    [ClientRpc]
+    [Server]
     private void AddScore(GameObject player)
     {
         Debug.Log("AddScore");
@@ -62,6 +62,7 @@ public class PlayersScoreManager : NetworkBehaviour
         }
     }
     
+    [ClientRpc]
     [ContextMenu("SetText")]
     private void SetText()
     {
