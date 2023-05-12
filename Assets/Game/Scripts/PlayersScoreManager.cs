@@ -21,6 +21,44 @@ public class PlayersScoreManager : NetworkBehaviour
         GlobalEventManager.OnPlayerConnect += AddPlayer;
         Initialize();
     }
+    
+    public override void OnStartClient()
+    {
+        _playerScoreDictionary.Callback += OnPlayerScoreDictionaryChange;
+
+        foreach (KeyValuePair<GameObject, int> kvp in _playerScoreDictionary)
+            OnPlayerScoreDictionaryChange(SyncDictionary<GameObject, int>.Operation.OP_ADD, kvp.Key, kvp.Value);
+    }
+
+    public Dictionary<GameObject, int> PlayerScoreDictionary = new Dictionary<GameObject, int>();
+    
+    void OnPlayerScoreDictionaryChange(SyncDictionary<GameObject, int>.Operation op, GameObject key, int value)
+    {
+        switch (op)
+        {
+            case SyncIDictionary<GameObject, int>.Operation.OP_ADD:
+                // entry added
+                PlayerScoreDictionary.Add(key, value);
+                break;
+            case SyncIDictionary<GameObject, int>.Operation.OP_SET:
+                // entry changed
+                PlayerScoreDictionary[key] = value;
+                break;
+            case SyncIDictionary<GameObject, int>.Operation.OP_REMOVE:
+                // entry removed
+                PlayerScoreDictionary.Remove(key);
+                break;
+            case SyncIDictionary<GameObject, int>.Operation.OP_CLEAR:
+                // Dictionary was cleared
+                PlayerScoreDictionary.Clear();
+                break;
+        }
+    }
+
+    public override void OnStopClient()
+    {
+        _playerScoreDictionary.Callback -= OnPlayerScoreDictionaryChange;
+    }
 
     private void OnDestroy()
     {
@@ -32,6 +70,7 @@ public class PlayersScoreManager : NetworkBehaviour
     {
         // SetText();
     }
+
 
     [Server]
     private void AddPlayer(GameObject player)
@@ -49,11 +88,17 @@ public class PlayersScoreManager : NetworkBehaviour
         // PlayerScoreDataReaderWriter.WritePlayerScoreData(, _playersScoreDataList);
 
         _playerScoreDictionary.Add(player, 0);
-        
+        Debug.Log("After AddPlayer : " + _playerScoreDictionary[player]);
+        _playerScoreDictionary[player] = 10;
+        Debug.Log("After = 10 : " + _playerScoreDictionary[player]);
+        _playerScoreDictionary[player] += 5;
+        Debug.Log("After + 5 : " + _playerScoreDictionary[player]);
+
+
         SetText();
     }
 
-    [Server]
+    [Command]
     private void AddScore(GameObject player)
     {
         // if (!isOwned) return;
@@ -87,7 +132,7 @@ public class PlayersScoreManager : NetworkBehaviour
         // {
         //     newText += ("\n" + playerScoreData.PlayerID + " - " + playerScoreData.Score);
         // }
-        foreach (var playerScore in _playerScoreDictionary)
+        foreach (var playerScore in PlayerScoreDictionary)
         {
             newText += ("\n" + playerScore.Key.name + " - " + playerScore.Value);
         }
